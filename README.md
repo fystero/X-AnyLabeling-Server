@@ -12,4 +12,4 @@
 
 ·700x700尺寸下的效果
 
-<img src="file:///C:/Users/25000/Desktop/xanylabeling/X-AnyLabeling-Server/assets/ScreenShot_2026-03-17_141431_836.png" title="" alt="" width="503">
+<img title="" src="https://github.com/fystero/X-AnyLabeling-Server/blob/main/assets/ScreenShot_2026-03-17_141431_836.png?raw=true" alt="" width="503">
