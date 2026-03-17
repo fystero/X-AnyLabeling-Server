@@ -1,77 +1,15 @@
-<div align="center">
-  <p>
-    <a href="https://github.com/CVHub520/X-AnyLabeling/" target="_blank">
-      <img alt="X-AnyLabeling" height="200px" src="https://github.com/user-attachments/assets/0714a182-92bd-4b47-b48d-1c5d7c225176"></a>
-  </p>
+# X-AnyLabeling-Server for any inference image size of sam3 model
 
-  <h3 align="center">
-    Simple, Lightweight, and Extensible Serving for X-AnyLabeling
-  </h3>
+为segment_anything_3 和segment_anything_3_video提供任意推理尺寸的的支持
 
-</div>
+## 原理
 
-<p align="center">
-    <a href=""><img src="https://img.shields.io/badge/python-3.10+-aff.svg"></a>
-    <a href=""><img src="https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg"></a>
-</p>
+在模型加载预训练权重时，屏蔽掉register_buffer中与freqs_cis有关的参数，让模型初始化过程中自动计算该参数，生成适应新尺寸的图片位置编码，新尺寸下模型也能够正常工作
 
-![](https://user-images.githubusercontent.com/18329471/234640541-a6a65fbc-d7a5-4ec3-9b65-55305b01a7aa.png)
+## 效果
 
-<img alt="X-AnyLabeling-Server Logo" src="assets/logo/X-AnyLabeling-Server.png" style="width:100%;display:block;" />
+原模型只支持设置推理分辨率为1008x1008，不具有适应各种任务的灵活性。如标注小目标任务时，用户往往希望增大推理尺寸，增加模型的准确率。另一方面，小的推理尺寸可以节约显存，提升推理速度，让模型运行在更多设备上。
 
-## About
+·700x700尺寸下的效果
 
-X-AnyLabeling-Server is a simple, lightweight and extensible serving framework for AI model inference, specifically designed for [X-AnyLabeling](https://github.com/CVHub520/X-AnyLabeling). It provides a production-ready solution with pluggable architecture and flexible configuration for various auto-labeling scenarios. Its core features include:
-
-- **Decoupled Design**: Framework handles service management and resource scheduling without interfering with model implementation details
-- **Pluggable Architecture**: Rapidly integrate custom models without modifying core framework code
-- **Production Ready**: Comprehensive structured logging, error handling, concurrency control, and security authentication
-- **Flexible Configuration**: All parameters are configurable with sensible defaults, adaptable to different deployment scenarios
-
-## Getting Started
-
-- [Installation and Setup](./docs/get_started.md)
-- [Custom Model Integration](./docs/user_guide.md)
-- [API Reference](./docs/router.md)
-- [Configuration Guide](./docs/configuration.md)
-
-## Contributing
-
-Contributions and collaborations are highly appreciated! For guidelines on how to contribute, please refer to [Contributing to X-AnyLabeling-Server](./CONTRIBUTING.md).
-
-## Sponsors
-
-- [buy-me-a-coffee](https://ko-fi.com/cvhub520)
-- [Wechat/Alipay](https://github.com/CVHub520/X-AnyLabeling/blob/main/README_zh-CN.md#%E8%B5%9E%E5%8A%A9)
-
-## Citing
-
-If you use this software in your research, please cite it as below:
-
-```
-@misc{X-AnyLabeling-Server,
-  year = {2025},
-  author = {Wei Wang},
-  publisher = {Github},
-  organization = {CVHub},
-  journal = {Github repository},
-  title = {A Simple, Lightweight, and Extensible Serving Framework for X-AnyLabeling},
-  howpublished = {\url{https://github.com/CVHub520/X-AnyLabeling-Server}}
-}
-
-@misc{X-AnyLabeling,
-  year = {2023},
-  author = {Wei Wang},
-  publisher = {Github},
-  organization = {CVHub},
-  journal = {Github repository},
-  title = {Advanced Auto Labeling Solution with Added Features},
-  howpublished = {\url{https://github.com/CVHub520/X-AnyLabeling}}
-}
-```
-
----
-
-![Star History Chart](https://api.star-history.com/svg?repos=CVHub520/X-AnyLabeling-Server&type=Date)
-
-<div align="center"><a href="#top">🔝 Back to Top</a></div>
+<img src="file:///C:/Users/25000/Desktop/xanylabeling/X-AnyLabeling-Server/assets/ScreenShot_2026-03-17_141431_836.png" title="" alt="" width="503">
