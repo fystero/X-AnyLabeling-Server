@@ -337,7 +337,7 @@ def _create_sam3_model(
     return model
 
 
-def _create_tracker_maskmem_backbone():
+def _create_tracker_maskmem_backbone(image_size):
     """Create the SAM3 Tracker memory encoder."""
     # Position encoding for mask memory backbone
     position_encoding = PositionEmbeddingSine(
@@ -350,7 +350,7 @@ def _create_tracker_maskmem_backbone():
 
     # Mask processing components
     mask_downsampler = SimpleMaskDownSampler(
-        kernel_size=3, stride=2, padding=1, interpol_size=[1152, 1152]
+        kernel_size=3, stride=2, padding=1, interpol_size=[image_size//14*16, image_size//14*16]
     )
 
     cx_block_layer = CXBlock(
@@ -452,7 +452,7 @@ def build_tracker(
     """
 
     # Create model components
-    maskmem_backbone = _create_tracker_maskmem_backbone()
+    maskmem_backbone = _create_tracker_maskmem_backbone(image_size)
     transformer = _create_tracker_transformer(image_size)
     backbone = None
     if with_backbone:
@@ -539,13 +539,16 @@ def _load_checkpoint(model, checkpoint_path):
     with g_pathmgr.open(checkpoint_path, "rb") as f:
         ckpt = torch.load(f, map_location="cpu", weights_only=True)
     
+    # 如果 checkpoint 包含 'model' 键且其值为字典，则提取该字典
     if "model" in ckpt and isinstance(ckpt["model"], dict):
         ckpt = ckpt["model"]
     
+    # 过滤出与 'detector' 相关的参数，并去除前缀
     sam3_image_ckpt = {
         k.replace("detector.", ""): v for k, v in ckpt.items() if "detector" in k
     }
     
+    # 如果存在实例交互预测器，则更新相关参数
     if model.inst_interactive_predictor is not None:
         sam3_image_ckpt.update(
             {
@@ -560,7 +563,7 @@ def _load_checkpoint(model, checkpoint_path):
     
     # 加载过滤后的 state_dict
     missing_keys, unexpected_keys = model.load_state_dict(filtered_sam3_image_ckpt, strict=False)
-    
+
 # def _load_checkpoint(model, checkpoint_path):
 #     """Load model checkpoint from file."""
 #     with g_pathmgr.open(checkpoint_path, "rb") as f:
@@ -701,6 +704,7 @@ def build_sam3_video_model(
     checkpoint_path: Optional[str] = None,
     load_from_HF=True,
     bpe_path: Optional[str] = None,
+    image_size: int =1008,
     has_presence_token: bool = True,
     geo_encoder_use_img_cross_attn: bool = True,
     strict_state_dict_loading: bool = True,
@@ -728,11 +732,11 @@ def build_sam3_video_model(
 
     # Build Tracker module
     tracker = build_tracker(
-        apply_temporal_disambiguation=apply_temporal_disambiguation
+        apply_temporal_disambiguation=apply_temporal_disambiguation,image_size=image_size
     )
 
     # Build Detector components
-    visual_neck = _create_vision_backbone()
+    visual_neck = _create_vision_backbone(image_size=image_size)
     text_encoder = _create_text_encoder(bpe_path)
     backbone = SAM3VLBackbone(scalp=1, visual=visual_neck, text=text_encoder)
     transformer = _create_sam3_transformer(
@@ -790,7 +794,7 @@ def build_sam3_video_model(
             recondition_every_nth_frame=16,
             masklet_confirmation_enable=False,
             decrease_trk_keep_alive_for_empty_masklets=True,
-            image_size=1008,
+            image_size=image_size,
             image_mean=(0.5, 0.5, 0.5),
             image_std=(0.5, 0.5, 0.5),
             compile_model=compile,
@@ -816,7 +820,7 @@ def build_sam3_video_model(
             recondition_every_nth_frame=0,
             masklet_confirmation_enable=False,
             decrease_trk_keep_alive_for_empty_masklets=True,
-            image_size=1008,
+            image_size=image_size,
             image_mean=(0.5, 0.5, 0.5),
             image_std=(0.5, 0.5, 0.5),
             compile_model=compile,
@@ -830,9 +834,10 @@ def build_sam3_video_model(
             ckpt = torch.load(f, map_location="cpu", weights_only=True)
         if "model" in ckpt and isinstance(ckpt["model"], dict):
             ckpt = ckpt["model"]
-
+        # sam3 video 也支持任意推理分辨率
+        filtered_ckpt = {k: v for k, v in ckpt.items() if not k.endswith('freqs_cis')}
         missing_keys, unexpected_keys = model.load_state_dict(
-            ckpt, strict=strict_state_dict_loading
+            filtered_ckpt, strict=False
         )
         if missing_keys:
             print(f"Missing keys: {missing_keys}")

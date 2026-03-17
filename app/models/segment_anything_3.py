@@ -113,7 +113,7 @@ class SegmentAnything3(BaseModel):
         logger.info(
             f"Processing text prompt: '{text_prompt}' with conf_threshold={conf_thresh}"
         )
-
+        torch.cuda.empty_cache()
         processor = Sam3Processor(
             self.model, resolution=image_size, confidence_threshold=conf_thresh, device=self.device
         )
@@ -241,6 +241,7 @@ class SegmentAnything3(BaseModel):
                 f"Box {i}: XYWH={box}, Label={label} (value={label_value})"
             )
         image_size = self.params.get("image_size")
+        torch.cuda.empty_cache()
         processor = Sam3Processor(
             self.model, resolution=image_size, confidence_threshold=conf_thresh, device=self.device
         )

@@ -28,6 +28,7 @@ class Sam3VideoPredictor:
         self,
         checkpoint_path=None,
         bpe_path=None,
+        image_size=1008,
         has_presence_token=True,
         geo_encoder_use_img_cross_attn=True,
         strict_state_dict_loading=True,
@@ -43,6 +44,7 @@ class Sam3VideoPredictor:
             build_sam3_video_model(
                 checkpoint_path=checkpoint_path,
                 bpe_path=bpe_path,
+                image_size= image_size,
                 has_presence_token=has_presence_token,
                 geo_encoder_use_img_cross_attn=geo_encoder_use_img_cross_attn,
                 strict_state_dict_loading=strict_state_dict_loading,
